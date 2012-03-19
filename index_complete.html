@@ -1,0 +1,116 @@
+<html>
+<head>
+  <meta name="viewport" content="initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+  <script src="jquery-1.5.1.min.js"></script>
+  <title>Ice Breaker</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <div id="user-info">Hello<br>
+    <a href="#" onclick="login();">Login</a><br>
+  </div>
+
+  <div id="fb-root"></div>
+
+  <br>
+  <a href="#" onclick="publishStory();">Publish feed story</a><br><br>
+  <a href="#" onclick="sendRequest();">Send request</a><br><br>
+  <div id="social-plugin">
+    <fb:like width="250"></fb:like>
+  </div>
+  <fb:comments href="https://YOUR_HOST_URL/icebreaker/" num_posts="2" width="300"></fb:comments>
+
+  
+  <script>
+  (function() {
+    var e = document.createElement('script'); e.async = true;
+    e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+    document.getElementById('fb-root').appendChild(e);
+    }());
+
+  window.fbAsyncInit = function() {
+    FB.init({ appId: 'YOUR_APP_ID', 
+    status: true, 
+    cookie: true,
+    xfbml: true,
+    oauth: true});
+
+    FB.Event.subscribe('auth.statusChange', handleStatusChange);	
+  };
+  
+
+ function handleStatusChange(response) {
+    if (response.authResponse) {
+      console.log(response);
+      updateUserInfo(response);
+      getCommonLikes(response);
+    }
+  }
+  
+  function getCommonLikes(response) {
+      var output = '';
+      
+    $(document).ready(function () {
+      $.ajax({url: 'api.php', type: "POST", dataType: 'json', data: { method: "getCommonLikes", location: location.coords }, success: function(data) {
+        output = '';
+        
+        console.log(data);
+        
+        for (var i = 0; i < data.likes.length; i++) {
+          output += '<h3>' + data.likes[i].like_name + '</h3>';
+          
+          if (data.likes[i].uids) {
+            output += '<h4>Shared with</h4><div id="user-friends">';
+            for (var n = 0; n < data.likes[i].uids.length; n++) {
+              output += '<img src="http://graph.facebook.com/' + data.likes[i].uids[n].id + '/picture"> ' + data.likes[i].uids[n].name;
+            }
+            
+            output += '</div><br><br>';
+          }
+        }
+        
+        $("body").append(output);
+        console.log(output);
+      }});
+    });
+  }
+
+  function updateUserInfo(response) {
+    FB.api('/me&fields=likes,id,name', function(response) {
+      document.getElementById('user-info').innerHTML = '<img src="https://graph.facebook.com/' + response.id + '/picture">' + response.name;
+    });
+  }
+ 
+  function login() {
+    FB.login(function(response) { }, {scope:'user_likes'});
+  }
+
+  function publishStory() {
+    FB.ui({
+      method: 'feed',
+      name: 'I\'m building a social mobile web app!',
+      caption: 'This web app is going to be awesome.',
+      description: 'Check out Facebook\'s developer site to start building.',
+      link: 'https://YOUR_HOST_URL/icebreaker/',
+      picture: 'http://www.facebookmobileweb.com/hackbook/img/facebook_icon_large.png'
+    }, 
+    function(response) {
+      console.log('publishStory response: ', response);
+    });
+    return false;
+  }
+  
+  function sendRequest() {
+    FB.ui({
+      method: 'apprequests',
+      message: 'Check out this awesome app!'
+    }, 
+    function(response) {
+      console.log('sendRequest response: ', response);
+    });
+  }
+
+  </script>
+
+</body>
+</html>

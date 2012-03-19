@@ -1,0 +1,34 @@
+<html>
+<head>
+  <title>Ice Breaker</title>
+  <script src="jquery-1.5.1.min.js"></script> 
+  <script>
+    function createTable() {
+      $(document).ready(function () {
+        $.ajax({url: 'create_table.php',
+                dataType: 'text',
+                success: function(data) {
+                  $("body").append('<br>'+data+'<br>');
+                }
+        });
+      });
+    }
+    function emptyTable() {
+      $(document).ready(function () {
+        $.ajax({url: 'empty_table.php',
+                dataType: 'text',
+                success: function(data) {
+                  $("body").append('<br>'+data+'<br>');
+                }
+        });
+      });
+    }
+  </script>
+</head>
+<body>
+ Manage Database Tables:
+<br><br>
+  <a href="#" onclick="createTable();">Create Table</a><br><br>
+  <a href="#" onclick="emptyTable();">Empty Table</a><br><br>
+</body>
+</html>
